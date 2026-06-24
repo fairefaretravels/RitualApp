@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>SENSTACK OS — Daily Authority Protocol</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --black: #0a0a0a;
+    --black2: #111111;
+    --black3: #1a1a1a;
+    --black4: #222222;
+    --gold: #c9a84c;
+    --gold2: #e8c96a;
+    --gold3: #8a6f2e;
+    --bronze: #7a5c3a;
+    --bronze2: #9a7a52;
+    --cream: #f0ead8;
+    --cream2: #d4c9aa;
+    --muted: #6a6057;
+    --danger: #c46a2a;
+    --success: #4a8a6a;
+    --glow: rgba(201,168,76,0.15);
+    --glow2: rgba(201,168,76,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* PARTICLES */
+  #particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+  .particle {
+    position: absolute;
+    width: 2px; height: 2px;
+    background: var(--gold);
+    border-radius: 50%;
+    animation: float linear infinite;
+    opacity: 0;
+  }
+  @keyframes float {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.2; }
+    100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+  }
+
+  /* LAYOUT */
+  .app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 0 0 120px; }
+
+  /* TOP BAR */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    background: rgba(10,10,10,0.95);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    position: sticky; top: 0; z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+  .topbar-logo { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--gold); letter-spacing: 3px; }
+  .topbar-date { font-size: 11px; color: var(--muted); }
+  .streak-badge {
+    background: var(--gold3); color: var(--cream); font-size: 10px;
+    padding: 4px 10px; border-radius: 20px; font-family: 'Space Mono', monospace;
+    letter-spacing: 1px;
+  }
+
+  /* GEOMETRY HERO */
+  .geo-hero {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 32px 20px 24px;
+    text-align: center;
+    position: relative;
+  }
+  .geo-container {
+    width: 180px; height: 180px; position: relative; cursor: pointer;
+    margin-bottom: 20px;
+  }
+  .geo-container svg { width: 100%; height: 100%; }
+  .geo-container.breathing svg { animation: geoBreath 2s ease-in-out 3; }
+  @keyframes geoBreath {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px rgba(201,168,76,0.3)); }
+    50% { transform: scale(1.08); filter: drop-shadow(0 0 24px rgba(201,168,76,0.7)); }
+  }
+  .geo-tap-hint {
+    font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .page-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px; font-weight: 300; color: var(--cream);
+    letter-spacing: 1px; line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .page-sub { font-size: 11px; color: var(--gold); letter-spacing: 3px; text-transform: uppercase; }
+
+  /* BREATH CIRCLE */
+  .breath-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.92); z-index: 200;
+    flex-direction: column; align-items: center; justify-content: center;
+    gap: 24px;
+  }
+  .breath-overlay.active { display: flex; }
+  .breath-ring {
+    width: 160px; height: 160px; border-radius: 50%;
+    border: 2px solid var(--gold3);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .breath-ring::after {
+    content: '';
+    position: absolute; inset: 8px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,168,76,0.2), transparent);
+  }
+  .breath-ring.inhale { animation: breathIn 4s ease-in-out forwards; }
+  .breath-ring.hold { animation: breathHold 4s ease forwards; }
+  .breath-ring.exhale { animation: breathOut 6s ease-in-out forwards; }
+  @keyframes breathIn { 0% { transform: scale(0.7); border-color: var(--gold3); } 100% { transform: scale(1.3); border-color: var(--gold); } }
+  @keyframes breathHold { 0%, 100% { transform: scale(1.3); border-color: var(--gold); } }
+  @keyframes breathOut { 0% { transform: scale(1.3); border-color: var(--gold); } 100% { transform: scale(0.7); border-color: var(--gold3); } }
+  .breath-label { font-family: 'Cormorant Garamond', serif; font-size: 32px; color: var(--gold); }
+  .breath-counter { font-family: 'Space Mono', monospace; font-size: 14px; color: var(--muted); }
+  .breath-statement { font-size: 13px; color: var(--cream2); text-align: center; max-width: 280px; line-height: 1.7; font-style: italic; }
+
+  /* CODES BANNER */
+  .codes-banner {
+    margin: 0 20px 20px;
+    background: var(--black3);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .codes-title { font-size: 10px; color: var(--gold3); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+  .codes-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .code-chip {
+    background: var(--black4);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    flex: 1; min-width: 90px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+  .code-chip:hover, .code-chip.active { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+  .code-num { font-family: 'Space Mono', monospace; font-size: 14px; color: var(--gold); display: block; letter-spacing: 2px; }
+  .code-lbl { font-size: 9px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+
+  /* HEALING TONES */
+  .tones-bar {
+    margin: 0 20px 20px;
+    background: var(--black3);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .tones-title { font-size: 10px; color: var(--gold3); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+  .tones-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .tone-btn {
+    background: var(--black4); border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 8px; padding: 10px 6px;
+    text-align: center; cursor: pointer; transition: all 0.3s;
+    font-family: inherit;
+  }
+  .tone-btn:hover { border-color: var(--gold); }
+  .tone-btn.playing { border-color: var(--gold); background: rgba(201,168,76,0.12); animation: tonePulse 1s ease infinite; }
+  @keyframes tonePulse { 0%,100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.3); } 50% { box-shadow: 0 0 0 6px rgba(201,168,76,0); } }
+  .tone-hz { font-family: 'Space Mono', monospace; font-size: 13px; color: var(--gold); display: block; }
+  .tone-name { font-size: 9px; color: var(--muted); margin-top: 2px; }
+  .tone-controls { display: flex; gap: 8px; margin-top: 10px; }
+  .tone-vol { flex: 1; accent-color: var(--gold); }
+  .stop-all { background: transparent; border: 1px solid var(--bronze); color: var(--bronze2); font-size: 10px; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-family: 'Space Mono', monospace; letter-spacing: 1px; }
+  .stop-all:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* PHASES */
+  .phases { padding: 0 20px; display: flex; flex-direction: column; gap: 16px; }
+
+  .phase-card {
+    background: var(--black2);
+    border: 1px solid rgba(201,168,76,0.12);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: border-color 0.3s;
+  }
+  .phase-card.active-phase { border-color: rgba(201,168,76,0.4); }
+  .phase-card.complete { border-color: rgba(74,138,106,0.5); }
+
+  .phase-header {
+    padding: 16px 20px;
+    display: flex; align-items: center; justify-content: space-between;
+    cursor: pointer;
+    background: var(--black3);
+  }
+  .phase-header:hover { background: rgba(201,168,76,0.05); }
+  .phase-left { display: flex; align-items: center; gap: 12px; }
+  .phase-icon { font-size: 20px; }
+  .phase-meta {}
+  .phase-name { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; color: var(--cream); }
+  .phase-sub { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; }
+  .phase-check {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--bronze);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 14px; color: transparent;
+    transition: all 0.3s;
+    background: transparent;
+    flex-shrink: 0;
+  }
+  .phase-check.done { border-color: var(--success); background: var(--success); color: white; }
+
+  .phase-body { padding: 20px; display: none; }
+  .phase-body.open { display: block; }
+
+  /* COMPANION ROW */
+  .companion-row {
+    display: flex; gap: 8px; margin-bottom: 16px;
+  }
+  .companion-chip {
+    flex: 1; background: var(--black4);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 8px; padding: 10px 8px; text-align: center;
+  }
+  .companion-emoji { font-size: 18px; display: block; margin-bottom: 4px; }
+  .companion-type { font-size: 8px; color: var(--gold3); letter-spacing: 2px; text-transform: uppercase; }
+  .companion-name { font-size: 11px; color: var(--cream2); }
+
+  /* YOGA + BREATH */
+  .practice-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .practice-chip {
+    flex: 1; background: var(--black4);
+    border: 1px solid rgba(201,168,76,0.1);
+    border-radius: 8px; padding: 12px 10px;
+  }
+  .practice-type { font-size: 8px; color: var(--bronze2); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+  .practice-name { font-size: 12px; color: var(--cream); font-weight: 500; }
+  .practice-detail { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* CODE BOX */
+  .code-box {
+    background: var(--black);
+    border: 1px solid rgba(201,168,76,0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .code-box-label { font-size: 9px; color: var(--gold3); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 6px; }
+  .code-box-number { font-family: 'Space Mono', monospace; font-size: 22px; color: var(--gold); letter-spacing: 6px; }
+  .code-box-desc { font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+  /* CHECKLIST */
+  .check-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: var(--black3); border-radius: 8px; padding: 10px 12px;
+    cursor: pointer;
+  }
+  .check-box {
+    width: 18px; height: 18px; border-radius: 4px;
+    border: 1.5px solid var(--bronze); flex-shrink: 0; margin-top: 1px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: transparent; transition: all 0.2s;
+    background: transparent;
+  }
+  .check-item.checked .check-box { border-color: var(--success); background: var(--success); color: white; }
+  .check-text { font-size: 12px; color: var(--cream2); line-height: 1.5; }
+  .check-item.checked .check-text { text-decoration: line-through; color: var(--muted); }
+
+  /* DECLARATION */
+  .declaration {
+    background: linear-gradient(135deg, rgba(201,168,76,0.08), rgba(122,92,58,0.08));
+    border-left: 3px solid var(--gold);
+    border-radius: 0 8px 8px 0;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .declaration p { font-family: 'Cormorant Garamond', serif; font-size: 15px; color: var(--cream); line-height: 1.7; font-style: italic; }
+
+  /* DECISION TRIANGLE */
+  .triangle-check { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+  .tri-item {
+    background: var(--black3); border-radius: 8px; padding: 12px 14px;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .tri-symbol { font-size: 18px; }
+  .tri-label { font-size: 13px; font-weight: 500; color: var(--cream); }
+  .tri-sub { font-size: 10px; color: var(--muted); }
+  .tri-btns { display: flex; gap: 6px; margin-top: 6px; }
+  .tri-btn {
+    padding: 4px 10px; border-radius: 20px; font-size: 10px; border: 1px solid;
+    cursor: pointer; background: transparent; font-family: 'Space Mono', monospace;
+    transition: all 0.2s;
+  }
+  .tri-btn.yes { border-color: var(--success); color: var(--success); }
+  .tri-btn.yes.sel { background: var(--success); color: white; }
+  .tri-btn.no { border-color: var(--danger); color: var(--danger); }
+  .tri-btn.no.sel { background: var(--danger); color: white; }
+  .tri-verdict {
+    background: var(--black); border: 1px solid var(--gold);
+    border-radius: 8px; padding: 12px 16px; text-align: center;
+    display: none;
+  }
+  .tri-verdict.show { display: block; }
+  .tri-verdict-label { font-family: 'Space Mono', monospace; font-size: 13px; letter-spacing: 2px; }
+
+  /* MARK COMPLETE BTN */
+  .mark-complete-btn {
+    width: 100%; padding: 14px;
+    background: transparent; border: 1px solid var(--gold3);
+    color: var(--gold); border-radius: 10px;
+    font-family: 'Space Mono', monospace; font-size: 11px; letter-spacing: 2px;
+    text-transform: uppercase; cursor: pointer; transition: all 0.3s;
+    margin-top: 16px;
+  }
+  .mark-complete-btn:hover { background: rgba(201,168,76,0.1); border-color: var(--gold); }
+  .mark-complete-btn.done { background: rgba(74,138,106,0.15); border-color: var(--success); color: var(--success); }
+
+  /* STREAK TRACKER */
+  .streak-section { margin: 20px; }
+  .streak-title { font-size: 10px; color: var(--gold3); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+  .streak-grid { display: flex; flex-direction: column; gap: 6px; }
+  .streak-row { display: flex; align-items: center; gap: 10px; }
+  .streak-day { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--muted); width: 36px; }
+  .streak-dots { display: flex; gap: 6px; }
+  .dot {
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 1.5px solid var(--bronze3, #444);
+    background: transparent; transition: all 0.3s;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; color: transparent;
+  }
+  .dot.done { border-color: var(--success); background: rgba(74,138,106,0.3); color: var(--success); }
+  .dot.today { border-color: var(--gold); }
+  .streak-label { font-size: 9px; color: var(--muted); }
+
+  /* AI SECTION */
+  .ai-section { margin: 20px; }
+  .ai-title { font-size: 10px; color: var(--gold3); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px; }
+  .ai-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .ai-tab {
+    padding: 6px 12px; border-radius: 20px;
+    border: 1px solid rgba(201,168,76,0.2);
+    background: transparent; color: var(--muted);
+    font-size: 10px; cursor: pointer; transition: all 0.2s;
+    font-family: inherit; letter-spacing: 1px;
+  }
+  .ai-tab:hover, .ai-tab.active {
+    border-color: var(--gold); color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+  .ai-panel { display: none; }
+  .ai-panel.active { display: block; }
+
+  .ai-input {
+    width: 100%;
+    background: var(--black3); border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 10px; padding: 12px 14px;
+    color: var(--cream); font-family: inherit; font-size: 13px;
+    resize: none; margin-bottom: 10px;
+    transition: border-color 0.2s;
+  }
+  .ai-input:focus { outline: none; border-color: var(--gold3); }
+  .ai-submit {
+    width: 100%; padding: 12px;
+    background: var(--gold3); color: var(--cream);
+    border: none; border-radius: 10px;
+    font-family: 'Space Mono', monospace; font-size: 11px;
+    letter-spacing: 2px; text-transform: uppercase;
+    cursor: pointer; transition: all 0.3s;
+  }
+  .ai-submit:hover { background: var(--gold); }
+  .ai-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ai-response {
+    margin-top: 12px;
+    background: var(--black3); border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 10px; padding: 14px;
+    font-size: 13px; line-height: 1.7; color: var(--cream2);
+    display: none;
+  }
+  .ai-response.show { display: block; }
+  .ai-response-inner { white-space: pre-wrap; }
+
+  /* EMOTION SELECTOR */
+  .emotion-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+  .emotion-btn {
+    background: var(--black3); border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 10px; padding: 12px 8px; text-align: center;
+    cursor: pointer; transition: all 0.2s; font-family: inherit;
+  }
+  .emotion-btn:hover, .emotion-btn.sel { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+  .emotion-emoji { font-size: 22px; display: block; margin-bottom: 4px; }
+  .emotion-lbl { font-size: 10px; color: var(--cream2); }
+
+  /* SPEND GUARD */
+  .spend-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .spend-input {
+    flex: 1; background: var(--black3);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 8px; padding: 10px 12px;
+    color: var(--cream); font-family: inherit; font-size: 13px;
+  }
+  .spend-input:focus { outline: none; border-color: var(--gold3); }
+
+  /* MANTRA */
+  .mantra-section {
+    margin: 20px; padding: 24px 20px;
+    background: var(--black3);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 16px; text-align: center;
+  }
+  .mantra-title { font-size: 10px; color: var(--gold3); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 16px; }
+  .mantra-word {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px; color: var(--cream2); line-height: 2.2;
+    display: block;
+  }
+  .mantra-word.bold { font-size: 22px; font-weight: 600; color: var(--gold); line-height: 1.5; }
+
+  /* EMERGENCY CODE */
+  .emergency-section { margin: 0 20px 20px; }
+  .emergency-card {
+    background: var(--black3);
+    border: 1px solid rgba(196,106,42,0.3);
+    border-radius: 12px; padding: 16px;
+    cursor: pointer; transition: all 0.3s;
+  }
+  .emergency-card:hover { border-color: var(--danger); }
+  .emergency-title { font-size: 10px; color: var(--danger); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 8px; }
+  .emergency-code { font-family: 'Space Mono', monospace; font-size: 20px; color: var(--gold); letter-spacing: 6px; }
+  .emergency-desc { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.6; }
+  .emergency-steps { display: none; margin-top: 12px; }
+  .emergency-steps.show { display: block; }
+  .emergency-step { font-size: 12px; color: var(--cream2); padding: 6px 0; border-bottom: 1px solid rgba(201,168,76,0.1); line-height: 1.5; }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(100px);
+    background: var(--black3); border: 1px solid var(--gold);
+    color: var(--cream); padding: 12px 24px; border-radius: 30px;
+    font-size: 12px; font-family: 'Space Mono', monospace; letter-spacing: 1px;
+    z-index: 300; transition: transform 0.4s;
+    white-space: nowrap;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  /* NAV */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px;
+    background: rgba(10,10,10,0.97); border-top: 1px solid rgba(201,168,76,0.15);
+    display: flex; justify-content: space-around; padding: 10px 0 16px;
+    backdrop-filter: blur(12px); z-index: 100;
+  }
+  .nav-item {
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    cursor: pointer; transition: all 0.2s; flex: 1;
+    background: transparent; border: none; font-family: inherit;
+  }
+  .nav-item:hover .nav-icon, .nav-item.active .nav-icon { transform: scale(1.15); }
+  .nav-item.active .nav-lbl { color: var(--gold); }
+  .nav-icon { font-size: 18px; }
+  .nav-lbl { font-size: 9px; color: var(--muted); letter-spacing: 1px; }
+  .nav-item.active .nav-lbl { color: var(--gold); }
+
+  /* SECTION PAGES */
+  .section-page { display: none; }
+  .section-page.active { display: block; }
+
+  /* PRICING SCRIPT */
+  .price-display {
+    background: var(--black);
+    border: 1px solid var(--gold3);
+    border-radius: 12px; padding: 20px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 16px; color: var(--cream); line-height: 1.9;
+    margin-top: 12px; display: none;
+  }
+  .price-display.show { display: block; }
+  .price-amount { font-size: 28px; color: var(--gold); font-weight: 600; display: block; margin: 8px 0; }
+
+  /* LOADING */
+  .ai-loading {
+    display: none; align-items: center; gap: 8px;
+    padding: 10px; color: var(--muted); font-size: 12px;
+  }
+  .ai-loading.show { display: flex; }
+  .loading-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: loadDot 1.2s ease infinite; }
+  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes loadDot { 0%,80%,100% { transform: scale(0.5); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
+
+  /* SECTION HEADER */
+  .section-header { padding: 16px 20px 0; }
+  .section-h { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--cream); margin-bottom: 4px; }
+  .section-s { font-size: 10px; color: var(--muted); letter-spacing: 2px; }
+
+  /* DIVIDER */
+  .gold-divider { height: 1px; background: linear-gradient(to right, transparent, rgba(201,168,76,0.3), transparent); margin: 20px; }
+</style>
+</head>
+<body>
+
+<!-- PARTICLES -->
+<div id="particles"></div>
+
+<!-- BREATH OVERLAY -->
+<div class="breath-overlay" id="breathOverlay">
+  <div class="breath-ring" id="breathRing"></div>
+  <div class="breath-label" id="breathLabel">Inhale</div>
+  <div class="breath-counter" id="breathCounter">Cycle 1 of 3</div>
+  <div class="breath-statement">
+    "I return to center.<br>I choose my actions deliberately."
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- APP WRAPPER -->
+<div class="app">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-logo">SENSTACK OS</div>
+    <div class="topbar-date" id="topDate"></div>
+    <div class="streak-badge" id="streakBadge">🔥 0 Days</div>
+  </div>
+
+  <!-- RITUAL PAGE -->
+  <div class="section-page active" id="page-ritual">
+
+    <!-- GEO HERO -->
+    <div class="geo-hero">
+      <div class="geo-tap-hint">Tap to activate breath cycle</div>
+      <div class="geo-container" id="geoContainer" onclick="startBreath()">
+        <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="geoGlow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#c9a84c" stop-opacity="0.2"/>
+              <stop offset="100%" stop-color="#c9a84c" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#glow)" stroke="#c9a84c" stroke-width="0.7" fill="none" opacity="0.85">
+            <!-- Outer circle -->
+            <circle cx="100" cy="100" r="90" stroke-opacity="0.4"/>
+            <!-- Six surrounding circles -->
+            <circle cx="100" cy="10" r="45"/>
+            <circle cx="178.97" cy="55" r="45"/>
+            <circle cx="178.97" cy="145" r="45"/>
+            <circle cx="100" cy="190" r="45"/>
+            <circle cx="21.03" cy="145" r="45"/>
+            <circle cx="21.03" cy="55" r="45"/>
+            <!-- Center circle -->
+            <circle cx="100" cy="100" r="45"/>
+            <!-- Inner Fruit of Life -->
+            <circle cx="100" cy="55" r="22.5"/>
+            <circle cx="138.97" cy="77.5" r="22.5"/>
+            <circle cx="138.97" cy="122.5" r="22.5"/>
+            <circle cx="100" cy="145" r="22.5"/>
+            <circle cx="61.03" cy="122.5" r="22.5"/>
+            <circle cx="61.03" cy="77.5" r="22.5"/>
+            <circle cx="100" cy="100" r="22.5" stroke-opacity="0.3"/>
+            <!-- Star of David lines -->
+            <line x1="100" y1="10" x2="178.97" y2="145"/>
+            <line x1="178.97" y1="145" x2="21.03" y2="145"/>
+            <line x1="21.03" y1="145" x2="100" y2="10"/>
+            <line x1="178.97" y1="55" x2="21.03" y2="55"/>
+            <line x1="21.03" y1="55" x2="100" y2="190"/>
+            <line x1="100" y1="190" x2="178.97" y2="55"/>
+            <!-- Center star point connections -->
+            <line x1="100" y1="55" x2="138.97" y2="122.5"/>
+            <line x1="138.97" y1="122.5" x2="61.03" y2="122.5"/>
+            <line x1="61.03" y1="122.5" x2="100" y2="55"/>
+            <line x1="138.97" y1="77.5" x2="61.03" y2="77.5"/>
+            <line x1="61.03" y1="77.5" x2="100" y2="145"/>
+            <line x1="100" y1="145" x2="138.97" y2="77.5"/>
+          </g>
+          <!-- Center glow -->
+          <circle cx="100" cy="100" r="90" fill="url(#geoGlow)"/>
+          <circle cx="100" cy="100" r="4" fill="#c9a84c" opacity="0.9"/>
+        </svg>
+      </div>
+      <div class="page-title">Daily Authority Protocol</div>
+      <div class="page-sub">SENSTACK Founder Focus Ritual</div>
+    </div>
+
+    <!-- GRABOVOI CODES -->
+    <div class="codes-banner">
+      <div class="codes-title">Grabovoi Activation Codes</div>
+      <div class="codes-row">
+        <div class="code-chip" onclick="activateCode(this, '5197148', 'Clarity & Focus')">
+          <span class="code-num">519 7148</span>
+          <span class="code-lbl">Clarity</span>
+        </div>
+        <div class="code-chip" onclick="activateCode(this, '318798', 'Financial Order')">
+          <span class="code-num">318 798</span>
+          <span class="code-lbl">Finance</span>
+        </div>
+        <div class="code-chip" onclick="activateCode(this, '741852', 'Decisive Will')">
+          <span class="code-num">741 852</span>
+          <span class="code-lbl">Will</span>
+        </div>
+        <div class="code-chip" onclick="activateCode(this, '5207418', 'Emotional Calm')">
+          <span class="code-num">520 7418</span>
+          <span class="code-lbl">Emotions</span>
+        </div>
+        <div class="code-chip" onclick="activateCode(this, '9187948', 'Energy Shield')">
+          <span class="code-num">918 7948</span>
+          <span class="code-lbl">Protection</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- HEALING TONES -->
+    <div class="tones-bar">
+      <div class="tones-title">Healing Frequencies</div>
+      <div class="tones-grid">
+        <button class="tone-btn" onclick="playTone(396, this)"><span class="tone-hz">396 Hz</span><div class="tone-name">Release Fear</div></button>
+        <button class="tone-btn" onclick="playTone(417, this)"><span class="tone-hz">417 Hz</span><div class="tone-name">Undo Blocks</div></button>
+        <button class="tone-btn" onclick="playTone(528, this)"><span class="tone-hz">528 Hz</span><div class="tone-name">DNA Repair</div></button>
+        <button class="tone-btn" onclick="playTone(639, this)"><span class="tone-hz">639 Hz</span><div class="tone-name">Connection</div></button>
+        <button class="tone-btn" onclick="playTone(741, this)"><span class="tone-hz">741 Hz</span><div class="tone-name">Intuition</div></button>
+        <button class="tone-btn" onclick="playTone(852, this)"><span class="tone-hz">852 Hz</span><div class="tone-name">Inner Order</div></button>
+        <button class="tone-btn" onclick="playTone(963, this)"><span class="tone-hz">963 Hz</span><div class="tone-name">Crown Open</div></button>
+        <button class="tone-btn" onclick="playTone(432, this)"><span class="tone-hz">432 Hz</span><div class="tone-name">Universal</div></button>
+        <button class="tone-btn" onclick="playTone(40, this)"><span class="tone-hz">40 Hz</span><div class="tone-name">Focus Gamma</div></button>
+      </div>
+      <div class="tone-controls">
+        <span style="font-size:10px;color:var(--muted);padding-top:4px;">Vol:</span>
+        <input type="range" class="tone-vol" id="toneVol" min="0" max="1" step="0.05" value="0.3" oninput="setVolume(this.value)">
+        <button class="stop-all" onclick="stopAllTones()">STOP ALL</button>
+      </div>
+    </div>
+
+    <!-- PHASES -->
+    <div class="phases">
+
+      <!-- DAWN PHASE -->
+      <div class="phase-card" id="phase-dawn">
+        <div class="phase-header" onclick="togglePhase('dawn')">
+          <div class="phase-left">
+            <div class="phase-icon">🌅</div>
+            <div class="phase-meta">
+              <div class="phase-name">Dawn Phase</div>
+              <div class="phase-sub">The Builder's Oath</div>
+            </div>
+          </div>
+          <div class="phase-check" id="check-dawn" onclick="event.stopPropagation(); markPhase('dawn')">✓</div>
+        </div>
+        <div class="phase-body" id="body-dawn">
+          <div class="code-box">
+            <div class="code-box-label">Focus Code</div>
+            <div class="code-box-number">519 7148</div>
+            <div class="code-box-desc">Say slowly. Repeat 3×. Between breaths.</div>
+          </div>
+          <div class="companion-row">
+            <div class="companion-chip">
+              <span class="companion-emoji">🌿</span>
+              <div class="companion-type">Herb</div>
+              <div class="companion-name">Rosemary</div>
+            </div>
+            <div class="companion-chip">
+              <span class="companion-emoji">💎</span>
+              <div class="companion-type">Crystal</div>
+              <div class="companion-name">Citrine</div>
+            </div>
+          </div>
+          <div class="practice-row">
+            <div class="practice-chip">
+              <div class="practice-type">Yoga</div>
+              <div class="practice-name">Mountain Pose</div>
+              <div class="practice-detail">Tadasana · 2 min</div>
+            </div>
+            <div class="practice-chip">
+              <div class="practice-type">Breathing</div>
+              <div class="practice-name">Box Breath</div>
+              <div class="practice-detail">4 · 4 · 4 · 4</div>
+            </div>
+          </div>
+          <div class="check-list">
+            <div class="check-item" onclick="toggleCheck(this)">
+              <div class="check-box">✓</div>
+              <div class="check-text">What is my ONE non-negotiable today?</div>
+            </div>
+            <div class="check-item" onclick="toggleCheck(this)">
+              <div class="check-box">✓</div>
+              <div class="check-text">What revenue-producing action moves my mission forward?</div>
+            </div>
+            <div class="check-item" onclick="toggleCheck(this)">
+              <div class="check-box">✓</div>
+              <div class="check-text">What can wait?</div>
+            </div>
+          </div>
+          <div class="declaration">
+            <p>"My value is clear. My pricing reflects results. I do not negotiate against myself."</p>
+          </div>
+          <button class="mark-complete-btn" id="btn-dawn" onclick="markPhase('dawn')">Mark Dawn Complete</button>
+        </div>
+      </div>
+
+      <!-- MIDDAY PHASE -->
+      <div class="phase-card" id="phase-midday">
+        <div class="phase-header" onclick="togglePhase('midday')">
+          <div class="phase-left">
+            <div class="phase-icon">⚡</div>
+            <div class="phase-meta">
+              <div class="phase-name">Midday Phase</div>
+              <div class="phase-sub">The Decision Triangle</div>
+            </div>
+          </div>
+          <div class="phase-check" id="check-midday" onclick="event.stopPropagation(); markPhase('midday')">✓</div>
+        </div>
+        <div class="phase-body" id="body-midday">
+          <div class="code-box">
+            <div class="code-box-label">Focus Code</div>
+            <div class="code-box-number">318 798</div>
+            <div class="code-box-desc">Financial clarity · Intentional action</div>
+          </div>
+          <div class="companion-row">
+            <div class="companion-chip">
+              <span class="companion-emoji">🌱</span>
+              <div class="companion-type">Herb</div>
+              <div class="companion-name">Peppermint</div>
+            </div>
+            <div class="companion-chip">
+              <span class="companion-emoji">🖤</span>
+              <div class="companion-type">Crystal</div>
+              <div class="companion-name">Black Tourmaline</div>
+            </div>
+          </div>
+          <div class="practice-row">
+            <div class="practice-chip">
+              <div class="practice-type">Yoga</div>
+              <div class="practice-name">Warrior II</div>
+              <div class="practice-detail">Virabhadrasana · 2 min</div>
+            </div>
+            <div class="practice-chip">
+              <div class="practice-type">Breathing</div>
+              <div class="practice-name">4-7-8 Reset</div>
+              <div class="practice-detail">In · Hold · Out</div>
+            </div>
+          </div>
+          <div class="triangle-check">
+            <div class="tri-item">
+              <div class="tri-symbol">🎯</div>
+              <div style="flex:1">
+                <div class="tri-label">MISSION?</div>
+                <div class="tri-sub">Does this move STV, SENSTACK, or G4E forward?</div>
+                <div class="tri-btns">
+                  <button class="tri-btn yes" onclick="triVote(this,'mission','yes')">YES</button>
+                  <button class="tri-btn no" onclick="triVote(this,'mission','no')">NO</button>
+                </div>
+              </div>
+            </div>
+            <div class="tri-item">
+              <div class="tri-symbol">💰</div>
+              <div style="flex:1">
+                <div class="tri-label">AFFORD?</div>
+                <div class="tri-sub">Can I comfortably afford this today?</div>
+                <div class="tri-btns">
+                  <button class="tri-btn yes" onclick="triVote(this,'afford','yes')">YES</button>
+                  <button class="tri-btn no" onclick="triVote(this,'afford','no')">NO</button>
+                </div>
+              </div>
+            </div>
+            <div class="tri-item">
+              <div class="tri-symbol">↩️</div>
+              <div style="flex:1">
+                <div class="tri-label">REVERSIBLE?</div>
+                <div class="tri-sub">Can I undo this if it's wrong?</div>
+                <div class="tri-btns">
+                  <button class="tri-btn yes" onclick="triVote(this,'reverse','yes')">YES</button>
+                  <button class="tri-btn no" onclick="triVote(this,'reverse','no')">NO</button>
+                </div>
+              </div>
+            </div>
+            <div class="tri-verdict" id="triVerdict"></div>
+          </div>
+          <div class="declaration">
+            <p>"I make decisions from strategy, not emotion."</p>
+          </div>
+          <button class="mark-complete-btn" id="btn-midday" onclick="markPhase('midday')">Mark Midday Complete</button>
+        </div>
+      </div>
+
+      <!-- EVENING PHASE -->
+      <div class="phase-card" id="phase-evening">
+        <div class="phase-header" onclick="togglePhase('evening')">
+          <div class="phase-left">
+            <div class="phase-icon">🌙</div>
+            <div class="phase-meta">
+              <div class="phase-name">Evening Phase</div>
+              <div class="phase-sub">The Closure Ceremony</div>
+            </div>
+          </div>
+          <div class="phase-check" id="check-evening" onclick="event.stopPropagation(); markPhase('evening')">✓</div>
+        </div>
+        <div class="phase-body" id="body-evening">
+          <div class="code-box">
+            <div class="code-box-label">Focus Code</div>
+            <div class="code-box-number">741 852</div>
+            <div class="code-box-desc">Authority · Rest · Release</div>
+          </div>
+          <div class="companion-row">
+            <div class="companion-chip">
+              <span class="companion-emoji">💜</span>
+              <div class="companion-type">Herb</div>
+              <div class="companion-name">Lavender</div>
+            </div>
+            <div class="companion-chip">
+              <span class="companion-emoji">🔮</span>
+              <div class="companion-type">Crystal</div>
+              <div class="companion-name">Amethyst</div>
+            </div>
+          </div>
+          <div class="practice-row">
+            <div class="practice-chip">
+              <div class="practice-type">Yoga</div>
+              <div class="practice-name">Child's Pose</div>
+              <div class="practice-detail">Balasana · 3 min</div>
+            </div>
+            <div class="practice-chip">
+              <div class="practice-type">Breathing</div>
+              <div class="practice-name">Extended Exhale</div>
+              <div class="practice-detail">4 in · 8 out</div>
+            </div>
+          </div>
+          <div class="check-list">
+            <div class="check-item" onclick="toggleCheck(this)">
+              <div class="check-box">✓</div>
+              <div class="check-text">What did I finish today?</div>
+            </div>
+            <div class="check-item" onclick="toggleCheck(this)">
+              <div class="check-box">✓</div>
+              <div class="check-text">What did I choose not to do? (boundaries honored)</div>
+            </div>
+            <div class="check-item" onclick="toggleCheck(this)">
+              <div class="check-box">✓</div>
+              <div class="check-text">What made me proud as a parent today?</div>
+            </div>
+            <div class="check-item" onclick="toggleCheck(this)">
+              <div class="check-box">✓</div>
+              <div class="check-text">What deserves gratitude?</div>
+            </div>
+          </div>
+          <div class="check-list" style="margin-top:0">
+            <div style="font-size:10px;color:var(--gold3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">Physical Closure</div>
+            <div class="check-item" onclick="toggleCheck(this)">
+              <div class="check-box">✓</div>
+              <div class="check-text">Close laptop</div>
+            </div>
+            <div class="check-item" onclick="toggleCheck(this)">
+              <div class="check-box">✓</div>
+              <div class="check-text">Close notebook</div>
+            </div>
+            <div class="check-item" onclick="toggleCheck(this)">
+              <div class="check-box">✓</div>
+              <div class="check-text">Turn off work notifications</div>
+            </div>
+          </div>
+          <div class="declaration">
+            <p>"The day is complete. I release what is unfinished. I return to my family fully."</p>
+          </div>
+          <button class="mark-complete-btn" id="btn-evening" onclick="markPhase('evening')">Mark Evening Complete</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- EMERGENCY CODE -->
+    <div class="gold-divider"></div>
+    <div class="emergency-section">
+      <div class="emergency-card" onclick="toggleEmergency()">
+        <div class="emergency-title">⚠️ Emotional Regulation — SOS</div>
+        <div class="emergency-code">520 7418</div>
+        <div class="emergency-desc">Tap when angry, anxious, overwhelmed, or scattered.</div>
+        <div class="emergency-steps" id="emergencySteps">
+          <div class="emergency-step">1. Pause. Hand on chest.</div>
+          <div class="emergency-step">2. Three slow breaths — 4 in, 8 out.</div>
+          <div class="emergency-step">3. Repeat: <em>"I respond. I do not react."</em></div>
+          <div class="emergency-step">4. State the code: 520 · 7418 · Say it 3×</div>
+          <div class="emergency-step">5. Return when centered.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 7-DAY STREAK -->
+    <div class="streak-section">
+      <div class="streak-title">7-Day Completion Tracker</div>
+      <div class="streak-grid" id="streakGrid"></div>
+    </div>
+
+    <!-- CORE MANTRA -->
+    <div class="mantra-section">
+      <div class="mantra-title">SENSTACK Core Mantra</div>
+      <span class="mantra-word bold">Focused. Disciplined. Present.</span>
+      <span class="mantra-word">I lead with clarity.</span>
+      <span class="mantra-word">I spend with intention.</span>
+      <span class="mantra-word">I price with confidence.</span>
+      <span class="mantra-word">I decide with authority.</span>
+      <span class="mantra-word">I build with patience.</span>
+      <span class="mantra-word">I parent with presence.</span>
+      <span class="mantra-word" style="margin-top:8px;color:var(--gold);font-style:italic">Every day I become the operator my vision requires.</span>
+    </div>
+
+  </div><!-- /page-ritual -->
+
+  <!-- AI TOOLS PAGE -->
+  <div class="section-page" id="page-ai">
+    <div class="section-header">
+      <div class="section-h">AI Command Center</div>
+      <div class="section-s">Powered by Saneca Intelligence</div>
+    </div>
+    <div class="ai-section">
+      <div class="ai-tabs">
+        <button class="ai-tab active" onclick="switchAI('focus', this)">Focus</button>
+        <button class="ai-tab" onclick="switchAI('emotion', this)">Emotion</button>
+        <button class="ai-tab" onclick="switchAI('spend', this)">Spend Guard</button>
+        <button class="ai-tab" onclick="switchAI('parent', this)">Parent</button>
+        <button class="ai-tab" onclick="switchAI('price', this)">Pricing</button>
+      </div>
+
+      <!-- FOCUS AI -->
+      <div class="ai-panel active" id="ai-focus">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px;line-height:1.6">Enter today's goal. AI distills it to your ONE non-negotiable.</div>
+        <textarea class="ai-input" id="focus-input" rows="3" placeholder="e.g. finish the guest portal, prep Emil's artist card, record radio promo..."></textarea>
+        <button class="ai-submit" onclick="runAI('focus')">ACTIVATE FOCUS SESSION</button>
+        <div class="ai-loading" id="loading-focus"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div><span>Processing...</span></div>
+        <div class="ai-response" id="response-focus"><div class="ai-response-inner" id="text-focus"></div></div>
+      </div>
+
+      <!-- EMOTION AI -->
+      <div class="ai-panel" id="ai-emotion">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">How are you feeling right now?</div>
+        <div class="emotion-grid">
+          <button class="emotion-btn" onclick="selectEmotion(this, 'angry')"><span class="emotion-emoji">😤</span><div class="emotion-lbl">Angry</div></button>
+          <button class="emotion-btn" onclick="selectEmotion(this, 'overwhelmed')"><span class="emotion-emoji">🌊</span><div class="emotion-lbl">Overwhelmed</div></button>
+          <button class="emotion-btn" onclick="selectEmotion(this, 'scattered')"><span class="emotion-emoji">🌀</span><div class="emotion-lbl">Scattered</div></button>
+          <button class="emotion-btn" onclick="selectEmotion(this, 'anxious')"><span class="emotion-emoji">😰</span><div class="emotion-lbl">Anxious</div></button>
+          <button class="emotion-btn" onclick="selectEmotion(this, 'tired')"><span class="emotion-emoji">😴</span><div class="emotion-lbl">Tired</div></button>
+          <button class="emotion-btn" onclick="selectEmotion(this, 'discouraged')"><span class="emotion-emoji">💔</span><div class="emotion-lbl">Discouraged</div></button>
+        </div>
+        <button class="ai-submit" id="emotion-submit" onclick="runAI('emotion')" disabled>GET MY RESET PROTOCOL</button>
+        <div class="ai-loading" id="loading-emotion"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div><span>Processing...</span></div>
+        <div class="ai-response" id="response-emotion"><div class="ai-response-inner" id="text-emotion"></div></div>
+      </div>
+
+      <!-- SPEND GUARD AI -->
+      <div class="ai-panel" id="ai-spend">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Before you spend — run the guard check.</div>
+        <div class="spend-row">
+          <input type="number" class="spend-input" id="spend-amount" placeholder="$ Amount" style="max-width:120px">
+          <input type="text" class="spend-input" id="spend-item" placeholder="What is this purchase?">
+        </div>
+        <button class="ai-submit" onclick="runAI('spend')">RUN SPEND GUARD</button>
+        <div class="ai-loading" id="loading-spend"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div><span>Processing...</span></div>
+        <div class="ai-response" id="response-spend"><div class="ai-response-inner" id="text-spend"></div></div>
+      </div>
+
+      <!-- PARENT AI -->
+      <div class="ai-panel" id="ai-parent">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Get a 5-minute presence activity for right now.</div>
+        <textarea class="ai-input" id="parent-input" rows="2" placeholder="Child's age or mood (optional): e.g. 7 year old, energetic..."></textarea>
+        <button class="ai-submit" onclick="runAI('parent')">GET PRESENCE ACTIVITY</button>
+        <div class="ai-loading" id="loading-parent"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div><span>Processing...</span></div>
+        <div class="ai-response" id="response-parent"><div class="ai-response-inner" id="text-parent"></div></div>
+      </div>
+
+      <!-- PRICE AI -->
+      <div class="ai-panel" id="ai-price">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:12px;">Generate your confident pricing statement — no apologies.</div>
+        <input type="text" class="ai-input" id="price-service" placeholder="Service (e.g. Mobile bartending for 4 hours, STV production package...)">
+        <input type="number" class="ai-input" id="price-amount" placeholder="Your price ($)" style="margin-top:8px">
+        <button class="ai-submit" onclick="runAI('price')" style="margin-top:8px">GENERATE PRICING STATEMENT</button>
+        <div class="ai-loading" id="loading-price"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div><span>Processing...</span></div>
+        <div class="price-display" id="price-display">
+          <div id="text-price"></div>
+        </div>
+      </div>
+
+    </div>
+  </div><!-- /page-ai -->
+
+</div><!-- /app -->
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="switchPage('ritual', this)">
+    <div class="nav-icon">🔯</div>
+    <div class="nav-lbl">RITUAL</div>
+  </button>
+  <button class="nav-item" onclick="switchPage('ai', this)">
+    <div class="nav-icon">🧠</div>
+    <div class="nav-lbl">AI TOOLS</div>
+  </button>
+</nav>
+
+<script>
+// ─── INIT ───
+const STORAGE_KEY = 'senstack_v2';
+
+function getStorage() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
+}
+function saveStorage(data) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+}
+
+function getTodayKey() {
+  return new Date().toISOString().split('T')[0];
+}
+
+let state = getStorage();
+if (!state.streak) state.streak = {};
+if (!state.phases) state.phases = {};
+
+// ─── PARTICLES ───
+const particlesEl = document.getElementById('particles');
+for (let i = 0; i < 30; i++) {
+  const p = document.createElement('div');
+  p.className = 'particle';
+  p.style.left = Math.random() * 100 + '%';
+  p.style.width = p.style.height = (Math.random() * 3 + 1) + 'px';
+  p.style.animationDuration = (Math.random() * 20 + 15) + 's';
+  p.style.animationDelay = (Math.random() * 20) + 's';
+  p.style.opacity = Math.random() * 0.4;
+  particlesEl.appendChild(p);
+}
+
+// ─── DATE ───
+const dateEl = document.getElementById('topDate');
+const now = new Date();
+dateEl.textContent = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+
+// ─── BREATH ANIMATION ───
+let breathRunning = false;
+function startBreath() {
+  if (breathRunning) return;
+  breathRunning = true;
+  const overlay = document.getElementById('breathOverlay');
+  const ring = document.getElementById('breathRing');
+  const label = document.getElementById('breathLabel');
+  const counter = document.getElementById('breathCounter');
+  overlay.classList.add('active');
+  document.getElementById('geoContainer').classList.add('breathing');
+
+  let cycle = 0;
+  const totalCycles = 3;
+  const phases = [
+    { name: 'Inhale', cls: 'inhale', dur: 4000 },
+    { name: 'Hold', cls: 'hold', dur: 4000 },
+    { name: 'Exhale', cls: 'exhale', dur: 6000 },
+  ];
+
+  function runCycle() {
+    if (cycle >= totalCycles) {
+      overlay.classList.remove('active');
+      document.getElementById('geoContainer').classList.remove('breathing');
+      breathRunning = false;
+      showToast('"I return to center. I choose deliberately."');
+      return;
+    }
+    counter.textContent = `Cycle ${cycle + 1} of ${totalCycles}`;
+    let pi = 0;
+    function runPhase() {
+      if (pi >= phases.length) { cycle++; runCycle(); return; }
+      const ph = phases[pi];
+      ring.className = 'breath-ring ' + ph.cls;
+      label.textContent = ph.name;
+      pi++;
+      setTimeout(runPhase, ph.dur);
+    }
+    runPhase();
+  }
+  runCycle();
+  overlay.onclick = () => {
+    overlay.classList.remove('active');
+    document.getElementById('geoContainer').classList.remove('breathing');
+    breathRunning = false;
+  };
+}
+
+// ─── CODES ───
+function activateCode(el, code, name) {
+  document.querySelectorAll('.code-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  showToast(`${name}: ${code.replace(/(\d{3})(\d{3,4})/, '$1 $2')}`);
+  setTimeout(() => el.classList.remove('active'), 3000);
+}
+
+// ─── HEALING TONES ───
+let audioCtx = null;
+const activeTones = {};
+let globalVol = 0.3;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function playTone(freq, btn) {
+  const ctx = getAudioCtx();
+  if (activeTones[freq]) {
+    activeTones[freq].osc.stop();
+    activeTones[freq].gain.disconnect();
+    delete activeTones[freq];
+    btn.classList.remove('playing');
+    return;
+  }
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = freq < 100 ? 'sine' : 'sine';
+  osc.frequency.value = freq;
+  gain.gain.value = globalVol;
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start();
+  activeTones[freq] = { osc, gain };
+  btn.classList.add('playing');
+  showToast(`Playing ${freq} Hz`);
+}
+
+function setVolume(v) {
+  globalVol = parseFloat(v);
+  Object.values(activeTones).forEach(t => t.gain.gain.value = globalVol);
+}
+
+function stopAllTones() {
+  Object.keys(activeTones).forEach(freq => {
+    activeTones[freq].osc.stop();
+    activeTones[freq].gain.disconnect();
+    delete activeTones[freq];
+  });
+  document.querySelectorAll('.tone-btn').forEach(b => b.classList.remove('playing'));
+  showToast('All tones stopped');
+}
+
+// ─── PHASES ───
+function togglePhase(name) {
+  const body = document.getElementById('body-' + name);
+  body.classList.toggle('open');
+  document.getElementById('phase-' + name).classList.toggle('active-phase', body.classList.contains('open'));
+}
+
+function toggleCheck(el) {
+  el.classList.toggle('checked');
+}
+
+function markPhase(name) {
+  const today = getTodayKey();
+  if (!state.phases[today]) state.phases[today] = {};
+  state.phases[today][name] = true;
+  saveStorage(state);
+
+  const check = document.getElementById('check-' + name);
+  const btn = document.getElementById('btn-' + name);
+  const card = document.getElementById('phase-' + name);
+  check.classList.add('done');
+  btn.classList.add('done');
+  btn.textContent = '✓ Complete';
+  card.classList.add('complete');
+
+  const phaseNames = { dawn: 'Dawn', midday: 'Midday', evening: 'Evening' };
+  showToast(`${phaseNames[name]} phase marked complete ✓`);
+
+  const phases = state.phases[today];
+  if (phases.dawn && phases.midday && phases.evening) {
+    updateStreak();
+    setTimeout(() => showToast('"I kept my promises to myself today." 🔥'), 2000);
+  }
+  renderStreak();
+}
+
+// ─── TRIANGLE VOTES ───
+const triVotes = { mission: null, afford: null, reverse: null };
+function triVote(btn, key, val) {
+  const parent = btn.parentElement;
+  parent.querySelectorAll('.tri-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  triVotes[key] = val;
+  evaluateTriangle();
+}
+
+function evaluateTriangle() {
+  if (!triVotes.mission || !triVotes.afford || !triVotes.reverse) return;
+  const verdict = document.getElementById('triVerdict');
+  const allYes = Object.values(triVotes).every(v => v === 'yes');
+  const anyNo = Object.values(triVotes).some(v => v === 'no');
+  verdict.classList.add('show');
+  if (allYes) {
+    verdict.style.borderColor = 'var(--success)';
+    verdict.innerHTML = '<div class="tri-verdict-label" style="color:var(--success)">✓ PROCEED WITH INTENTION</div><div style="font-size:11px;color:var(--muted);margin-top:6px">All criteria met. Move forward deliberately.</div>';
+  } else {
+    verdict.style.borderColor = 'var(--danger)';
+    verdict.innerHTML = '<div class="tri-verdict-label" style="color:var(--danger)">⏸ WAIT 24 HOURS</div><div style="font-size:11px;color:var(--muted);margin-top:6px">One or more criteria failed. Pause. Revisit tomorrow.</div>';
+  }
+}
+
+// ─── EMERGENCY ───
+function toggleEmergency() {
+  document.getElementById('emergencySteps').classList.toggle('show');
+}
+
+// ─── STREAK ───
+function updateStreak() {
+  const today = getTodayKey();
+  state.streak[today] = true;
+  saveStorage(state);
+}
+
+function countStreak() {
+  let count = 0;
+  const d = new Date();
+  for (let i = 0; i < 30; i++) {
+    const key = d.toISOString().split('T')[0];
+    if (state.streak[key]) count++;
+    else if (i > 0) break;
+    d.setDate(d.getDate() - 1);
+  }
+  return count;
+}
+
+function renderStreak() {
+  const grid = document.getElementById('streakGrid');
+  grid.innerHTML = '';
+  const today = getTodayKey();
+  const todayPhases = state.phases[today] || {};
+  const streakCount = countStreak();
+  document.getElementById('streakBadge').textContent = `🔥 ${streakCount} Day${streakCount !== 1 ? 's' : ''}`;
+
+  for (let d = 0; d < 7; d++) {
+    const date = new Date();
+    date.setDate(date.getDate() - (6 - d));
+    const key = date.toISOString().split('T')[0];
+    const isToday = key === today;
+    const dayLabel = isToday ? 'TODAY' : date.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase();
+
+    const phases = state.phases[key] || {};
+    const phaseList = ['dawn', 'midday', 'evening'];
+
+    const row = document.createElement('div');
+    row.className = 'streak-row';
+    row.innerHTML = `<div class="streak-day">${dayLabel}</div><div class="streak-dots">${
+      phaseList.map(p => {
+        const done = phases[p];
+        const todayClass = (isToday && !done) ? ' today' : '';
+        return `<div class="dot${done ? ' done' : todayClass}">${done ? '✓' : ''}</div>`;
+      }).join('')
+    }</div><div class="streak-label">${phaseList.filter(p => phases[p]).length}/3</div>`;
+    grid.appendChild(row);
+  }
+
+  // restore today's phase UI
+  ['dawn', 'midday', 'evening'].forEach(name => {
+    if (todayPhases[name]) {
+      const check = document.getElementById('check-' + name);
+      const btn = document.getElementById('btn-' + name);
+      const card = document.getElementById('phase-' + name);
+      if (check) check.classList.add('done');
+      if (btn) { btn.classList.add('done'); btn.textContent = '✓ Complete'; }
+      if (card) card.classList.add('complete');
+    }
+  });
+}
+
+renderStreak();
+
+// ─── NAVIGATION ───
+function switchPage(page, btn) {
+  document.querySelectorAll('.section-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  btn.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ─── AI TABS ───
+let selectedEmotion = null;
+function switchAI(panel, btn) {
+  document.querySelectorAll('.ai-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.ai-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ai-' + panel).classList.add('active');
+}
+
+function selectEmotion(btn, emotion) {
+  document.querySelectorAll('.emotion-btn').forEach(b => b.classList.remove('sel'));
+  btn.classList.add('sel');
+  selectedEmotion = emotion;
+  document.getElementById('emotion-submit').disabled = false;
+}
+
+// ─── TOAST ───
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─── AI CALLS ───
+async function runAI(type) {
+  const loading = document.getElementById('loading-' + type);
+  const responseEl = document.getElementById('response-' + type);
+  const textEl = document.getElementById('text-' + type);
+  let prompt = '';
+
+  if (type === 'focus') {
+    const goal = document.getElementById('focus-input').value.trim();
+    if (!goal) { showToast('Enter a goal first'); return; }
+    prompt = `You are a founder focus coach for Loveface, who runs STV On Air, Radio Meltdown, Mack Magic Mobile Bar, XOCO Designs, and Animation Prep in Metro Atlanta. He needs extreme focus discipline.
+
+His goals for today: "${goal}"
+
+Respond with:
+1. ONE non-negotiable task (the most mission-critical thing)
+2. Why this is the anchor task (2 sentences max)
+3. A 25-minute Pomodoro focus prompt to start it right now
+4. One thing to explicitly ignore/defer today
+
+Format with clear headers. Keep it sharp, direct, and founder-minded. No fluff.`;
+  }
+  else if (type === 'emotion') {
+    if (!selectedEmotion) { showToast('Select an emotion first'); return; }
+    prompt = `You are a mind-body coach for a Black founder and father named Loveface who runs multiple businesses (STV On Air, Radio Meltdown, Mack Magic Mobile Bar, XOCO Designs, Animation Prep). He is feeling: ${selectedEmotion}.
+
+Provide a complete reset protocol with:
+1. A specific breathing exercise (with counts)
+2. The ideal herb to use right now and how (smell, tea, etc.)
+3. The best crystal to hold and why
+4. A 2-3 minute yoga pose to do immediately
+5. One grounding reflection question to journal
+6. A short power statement to repeat (3-5 words)
+
+Keep it practical, embodied, and calibrated for a busy founder-parent. No spiritual bypassing — real tools.`;
+  }
+  else if (type === 'spend') {
+    const amount = document.getElementById('spend-amount').value;
+    const item = document.getElementById('spend-item').value.trim();
+    if (!amount || !item) { showToast('Enter amount and item'); return; }
+    prompt = `You are the spending guard for Loveface, a founder running STV On Air, Radio Meltdown, Mack Magic Mobile Bar, XOCO Designs, and Animation Prep in Metro Atlanta. He is building multiple revenue streams and must spend with discipline.
+
+Proposed purchase: $${amount} for "${item}"
+
+Evaluate against 3 criteria:
+1. MISSION: Does this directly move STV, Mack Magic, XOCO, or Animation Prep forward?
+2. AFFORD: Is this a healthy cash outlay right now for a bootstrapped founder?
+3. REVERSIBLE: Can this be undone if wrong?
+
+Return a clear verdict: BUY NOW / WAIT 24 HOURS / REJECT with a 2-sentence explanation for each criterion. Be blunt. No sugarcoating. His financial discipline depends on your honesty.`;
+  }
+  else if (type === 'parent') {
+    const context = document.getElementById('parent-input').value.trim();
+    prompt = `You are a parent presence coach. Loveface is a founder-father who needs to disconnect from work mode and connect with his child RIGHT NOW.
+
+Context: ${context || 'general, no age specified'}
+
+Generate a single 5-minute presence activity that:
+- Requires zero prep or supplies (or minimal)
+- Creates genuine connection, not just proximity
+- Has a specific opening line he can say to begin
+- Ends with a question that makes the child feel truly seen
+
+Keep it warm, specific, and real. Not generic advice — a concrete activity he can start in the next 60 seconds.`;
+  }
+  else if (type === 'price') {
+    const service = document.getElementById('price-service').value.trim();
+    const price = document.getElementById('price-amount').value;
+    if (!service || !price) { showToast('Enter service and price'); return; }
+    prompt = `You are a pricing confidence coach. Loveface runs Mack Magic Mobile Bar (mobile bartending), STV On Air (broadcast/production), XOCO Designs (furniture/interior design), and Animation Prep (education). He tends to apologize for his rates or over-explain.
+
+Service: ${service}
+Price: $${price}
+
+Write a confident, direct pricing statement that:
+- States the investment clearly (use "The investment is $X")
+- Includes 1-2 powerful sentences about the value delivered (no fluff)
+- Ends with a silence cue — a prompt to stop talking
+- Never apologizes, never discounts, never explains unless asked
+
+Then give him 3 comeback lines for when a client says "that's too much" — each one holds the price with grace.`;
+  }
+
+  loading.classList.add('show');
+  if (responseEl) responseEl.classList.remove('show');
+  if (type === 'price') document.getElementById('price-display').classList.remove('show');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.map(c => c.text || '').join('') || 'No response received.';
+
+    if (type === 'price') {
+      const display = document.getElementById('price-display');
+      display.innerHTML = `<div id="text-price" style="white-space:pre-wrap;font-family:'Cormorant Garamond',serif;font-size:15px;line-height:1.8;color:var(--cream)">${text}</div>`;
+      display.classList.add('show');
+    } else {
+      textEl.textContent = text;
+      responseEl.classList.add('show');
+    }
+  } catch (err) {
+    const errorText = 'Connection error. Check your network and try again.';
+    if (type === 'price') {
+      document.getElementById('price-display').innerHTML = `<div style="color:var(--muted)">${errorText}</div>`;
+      document.getElementById('price-display').classList.add('show');
+    } else {
+      textEl.textContent = errorText;
+      responseEl.classList.add('show');
+    }
+  } finally {
+    loading.classList.remove('show');
+  }
+}
+</script>
+</body>
+</html>
