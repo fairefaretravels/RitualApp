@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff8e8">
+<title>Ritual OS 2.0 — Protect. Direct. Create. Receive. Release.</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+:root{
+ --cream:#fff8e8;--cream2:#fffdf6;--plum:#39264d;--plum2:#59416d;
+ --gold:#f4c95d;--gold2:#dcae38;--lav:#b8a1e8;--sky:#78c8e8;
+ --jade:#70c49a;--coral:#f28f79;--ink:#39264d;--muted:#766c7d;
+ --line:rgba(57,38,77,.12);--shadow:0 12px 34px rgba(57,38,77,.10);
+ --nav:rgba(255,248,232,.94);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:linear-gradient(180deg,#fff8e8 0%,#fffdf6 42%,#f7f1ff 100%);color:var(--ink);font-family:Inter,sans-serif;min-height:100vh}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.app{width:min(100%,520px);margin:auto;padding-bottom:110px;position:relative}
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:13px 18px;background:var(--nav);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.logo{font-family:Space Mono;font-size:10px;letter-spacing:2px;font-weight:700}.date{font-size:10px;color:var(--muted)}
+.pill{font:700 9px Space Mono;padding:7px 9px;border-radius:20px;background:#f9df91;color:var(--plum);white-space:nowrap}
+.hero{padding:28px 20px 20px;text-align:center}
+.sun{width:150px;height:150px;margin:auto auto 15px;position:relative;display:grid;place-items:center}
+.sun:before{content:"";position:absolute;inset:20px;border-radius:50%;background:radial-gradient(circle,#f8d978,#f4c95d 55%,#f28f79);box-shadow:0 0 45px rgba(244,201,93,.45)}
+.sun:after{content:"";position:absolute;inset:4px;border:1px solid rgba(57,38,77,.16);border-radius:50%;box-shadow:inset 0 0 0 12px rgba(255,255,255,.25),0 0 0 20px rgba(184,161,232,.13)}
+.orbit{position:absolute;inset:0;border:1px dashed rgba(57,38,77,.22);border-radius:50%;animation:spin 22s linear infinite}
+.orbit span{position:absolute;width:10px;height:10px;border-radius:50%;background:var(--lav);top:5px;left:50%;transform:translateX(-50%)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.eyebrow{font:700 9px Space Mono;letter-spacing:2.5px;color:var(--plum2);text-transform:uppercase}
+h1{font:600 34px "Cormorant Garamond";line-height:1.05;margin:5px 0}.hero p{font-size:12px;color:var(--muted);line-height:1.6;max-width:350px;margin:auto}
+.intention{margin:0 18px 18px;padding:18px;border-radius:18px;background:linear-gradient(135deg,#fff,#fff5cc);border:1px solid rgba(244,201,93,.55);box-shadow:var(--shadow)}
+.label{font:700 9px Space Mono;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:8px}
+.intention strong{font:600 19px "Cormorant Garamond"}.intention button{float:right;border:0;background:var(--plum);color:#fff;padding:8px 11px;border-radius:10px;font-size:10px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:0 18px 20px}
+.card{border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.72);box-shadow:0 7px 22px rgba(57,38,77,.06);padding:16px;text-align:left;transition:.2s}
+.card:active{transform:scale(.98)}
+.action{min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
+.action .symbol{font-size:25px}.action h2{font:600 22px "Cormorant Garamond"}.action p{font-size:9px;color:var(--muted);line-height:1.4}
+.protect{background:linear-gradient(145deg,#f5efff,#fff)}.clear{background:linear-gradient(145deg,#edfaff,#fff)}
+.create{background:linear-gradient(145deg,#effbf4,#fff)}.build{background:linear-gradient(145deg,#fff7d7,#fff)}
+.receive{background:linear-gradient(145deg,#fff0ec,#fff)}.decide{background:linear-gradient(145deg,#f5efff,#fff)}
+.close{background:linear-gradient(145deg,#fffdf6,#f4effc)}
+.section{display:none}.section.active{display:block}.section-title{padding:12px 18px 18px}.section-title h2{font:600 29px "Cormorant Garamond"}.section-title p{font-size:11px;color:var(--muted);line-height:1.5}
+.panel{margin:0 18px 14px;padding:17px;border-radius:18px;background:rgba(255,255,255,.78);border:1px solid var(--line);box-shadow:var(--shadow)}
+.panel h3{font:600 21px "Cormorant Garamond";margin-bottom:5px}.panel small{color:var(--muted);font-size:10px;line-height:1.5}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+.input,textarea,select{width:100%;border:1px solid var(--line);background:#fffdf8;border-radius:12px;padding:11px;color:var(--ink);outline:none}
+textarea{resize:vertical;min-height:90px}.input:focus,textarea:focus,select:focus{border-color:var(--lav);box-shadow:0 0 0 3px rgba(184,161,232,.15)}
+.primary{width:100%;border:0;border-radius:12px;padding:12px;background:var(--plum);color:#fff;font:700 10px Space Mono;letter-spacing:1px;margin-top:9px}.secondary{border:1px solid var(--line);border-radius:11px;background:#fff;padding:10px;color:var(--plum);font-size:10px}
+.name-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}.name-card{padding:13px;border:1px solid var(--line);border-radius:14px;background:#fff;display:flex;justify-content:space-between;gap:10px}.name-card strong{font:600 19px "Cormorant Garamond"}.name-card small{display:block}.tag{display:inline-block;padding:4px 7px;border-radius:10px;background:#f1eaff;font-size:8px;margin-top:5px}
+.ward{background:linear-gradient(135deg,#fff2b8,#f5efff);text-align:center;padding:22px}.ward-orb{width:105px;height:105px;border-radius:50%;margin:0 auto 13px;display:grid;place-items:center;background:radial-gradient(circle,#fffdf5,#f4c95d 52%,#b8a1e8);box-shadow:0 0 0 12px rgba(244,201,93,.13),0 0 45px rgba(244,201,93,.25);font-size:32px}.ward h3{font:600 28px "Cormorant Garamond"}
+.veil{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:13px}.veil button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 3px;font-size:9px;color:var(--plum)}.veil button.active{background:var(--lav);border-color:var(--lav)}
+.quick{display:flex;gap:8px;overflow:auto;padding:0 18px 16px}.quick button{white-space:nowrap;border:1px solid var(--line);background:#fff;border-radius:20px;padding:9px 12px;font-size:9px;color:var(--plum)}
+.check{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font-size:11px;line-height:1.5}.check:last-child{border:0}.check input{accent-color:var(--jade);margin-top:2px}
+.code{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:13px;background:#f8f3ff;margin-top:10px}.code b{font:700 15px Space Mono}.code span{font-size:9px;color:var(--muted)}
+.practice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}.practice{padding:12px;background:#fff;border:1px solid var(--line);border-radius:12px}.practice b{font-size:11px}.practice span{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.breath{position:fixed;inset:0;z-index:100;background:rgba(57,38,77,.94);display:none;place-items:center;color:#fff;text-align:center}.breath.active{display:grid}.breath-inner{display:grid;place-items:center;gap:15px}.breath-circle{width:170px;height:170px;border:2px solid var(--gold);border-radius:50%;display:grid;place-items:center;font:600 27px "Cormorant Garamond";box-shadow:0 0 50px rgba(244,201,93,.25)}.breath-circle.in{animation:bin 4s ease forwards}.breath-circle.out{animation:bout 6s ease forwards}@keyframes bin{to{transform:scale(1.3)}}@keyframes bout{to{transform:scale(.75)}}
+.quote{font:italic 17px "Cormorant Garamond";line-height:1.6;padding:14px 0}.result{margin-top:10px;padding:14px;border-radius:13px;background:#f6f0ff;white-space:pre-wrap;font-size:11px;line-height:1.7}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);z-index:60;width:min(100%,520px);display:flex;justify-content:space-around;padding:9px 5px calc(10px + env(safe-area-inset-bottom));background:var(--nav);backdrop-filter:blur(18px);border-top:1px solid var(--line)}.nav button{border:0;background:transparent;color:var(--muted);font-size:9px;flex:1}.nav .ico{display:block;font-size:18px;margin-bottom:3px}.nav button.active{color:var(--plum);font-weight:700}
+.toast{position:fixed;left:50%;bottom:88px;transform:translate(-50%,20px);opacity:0;z-index:150;background:var(--plum);color:#fff;padding:11px 16px;border-radius:22px;font-size:10px;transition:.25s;white-space:nowrap;max-width:90%;overflow:hidden;text-overflow:ellipsis}.toast.show{opacity:1;transform:translate(-50%,0)}
+.empty{padding:14px;color:var(--muted);font-size:10px;text-align:center}
+.footer{text-align:center;padding:25px 20px;color:var(--muted);font-size:9px;line-height:1.6}
+@media(min-width:700px){body{padding:20px 0}.app{border-radius:28px;overflow:hidden;box-shadow:0 20px 70px rgba(57,38,77,.12)}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar">
+  <div class="logo">RITUAL OS 2.0</div>
+  <div class="date" id="date"></div>
+  <div class="pill" id="streak">0 DAYS</div>
+</header>
+
+<main id="home" class="section active">
+  <section class="hero">
+    <div class="sun"><div class="orbit"><span></span></div><div style="position:relative;font-size:30px">☀</div></div>
+    <div class="eyebrow">Personal Spiritual + Practical Operating System</div>
+    <h1>Protect what you're building.</h1>
+    <p>Not fear. Not force. Intention, boundaries, creativity, work, money, reflection and release.</p>
+  </section>
+
+  <section class="intention">
+    <button onclick="setIntention()">CHANGE</button>
+    <div class="label">Today's intention</div>
+    <strong id="intention">I move with clarity and authority.</strong>
+  </section>
+
+  <div class="grid">
+    <button class="card action protect" onclick="openSection('protect')"><span class="symbol">✦</span><div><h2>Protect</h2><p>Names · boundaries · space · privacy</p></div></button>
+    <button class="card action clear" onclick="openSection('clear')"><span class="symbol">◌</span><div><h2>Clear</h2><p>Reset · ground · breathe · release</p></div></button>
+    <button class="card action create" onclick="openSection('create')"><span class="symbol">✎</span><div><h2>Create</h2><p>Music · art · ideas · expression</p></div></button>
+    <button class="card action build" onclick="openSection('build')"><span class="symbol">⌂</span><div><h2>Build</h2><p>Business · clients · revenue · launches</p></div></button>
+    <button class="card action receive" onclick="openSection('receive')"><span class="symbol">✧</span><div><h2>Receive</h2><p>Money · opportunities · recognition</p></div></button>
+    <button class="card action decide" onclick="openSection('decide')"><span class="symbol">◇</span><div><h2>Decide</h2><p>Intuition · reflection · reality check</p></div></button>
+    <button class="card action close" onclick="openSection('close')" style="grid-column:1/-1"><span class="symbol">☾</span><div><h2>Close</h2><p>Release the day. Archive what matters. Return to yourself.</p></div></button>
+  </div>
+
+  <div class="panel">
+    <div class="label">Start here</div>
+    <h3>One breath. One decision. One action.</h3>
+    <small>Tap the sun to begin a short breathing cycle, then choose the area that needs your attention.</small>
+    <button class="primary" onclick="startBreath()">BEGIN BREATH CYCLE</button>
+  </div>
+</main>
+
+<section id="protect" class="section">
+  <div class="section-title"><div class="eyebrow">PROTECT</div><h2>Your identity has boundaries.</h2><p>Use spiritual practice as intentional protection and practical boundaries. You decide what gets access.</p></div>
+  <div class="panel ward">
+    <div class="ward-orb">✦</div><h3>WARD ALL</h3><small>Symbolically gather every active name under one protection intention.</small>
+    <button class="primary" onclick="wardAll()">ACTIVATE NAME WARD</button>
+    <div id="wardResult"></div>
+  </div>
+  <div class="panel">
+    <h3>Name Vault</h3><small>Organize the names that carry your identity, creativity and work.</small>
+    <div class="name-list" id="names"></div>
+    <button class="secondary" style="width:100%;margin-top:10px" onclick="addName()">+ ADD NAME</button>
+  </div>
+  <div class="panel">
+    <h3>The Veil</h3><small>Choose an access level for your time, information, creative work and identity.</small>
+    <div class="veil" id="veil"></div>
+  </div>
+  <div class="panel">
+    <h3>Protection intention</h3>
+    <div class="quote">“What carries my name is handled with integrity. I decide what receives my access.”</div>
+    <button class="secondary" onclick="saveNote('protection')">SAVE AS TODAY'S INTENTION</button>
+  </div>
+</section>
+
+<section id="clear" class="section">
+  <div class="section-title"><div class="eyebrow">CLEAR</div><h2>Return to center.</h2><p>Short practices for resetting attention and creating space.</p></div>
+  <div class="panel">
+    <h3>Breath Reset</h3><small>Slow breathing can be used as a grounding practice. Stop if you feel uncomfortable.</small>
+    <button class="primary" onclick="startBreath()">4 IN · 4 HOLD · 6 OUT</button>
+  </div>
+  <div class="panel">
+    <h3>Simple cleansing ritual</h3>
+    <label class="check"><input type="checkbox"> Open a window or change the physical atmosphere.</label>
+    <label class="check"><input type="checkbox"> Wash your hands slowly while naming what you are releasing.</label>
+    <label class="check"><input type="checkbox"> Tidy one small surface.</label>
+    <label class="check"><input type="checkbox"> Speak one boundary for the rest of today.</label>
+    <label class="check"><input type="checkbox"> Take three slow breaths before moving on.</label>
+  </div>
+  <div class="panel">
+    <h3>Companions</h3>
+    <div class="practice-grid">
+      <div class="practice"><b>🌿 Rosemary</b><span>Traditionally associated with remembrance and cleansing.</span></div>
+      <div class="practice"><b>💜 Lavender</b><span>Traditionally associated with calm and ritual.</span></div>
+      <div class="practice"><b>💎 Citrine</b><span>Commonly used symbolically for confidence and abundance.</span></div>
+      <div class="practice"><b>🪻 Amethyst</b><span>Commonly used symbolically for reflection and spiritual practice.</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="create" class="section">
+  <div class="section-title"><div class="eyebrow">CREATE</div><h2>Make the thing.</h2><p>Turn inspiration into a concrete creative action.</p></div>
+  <div class="panel">
+    <h3>Creative activation</h3>
+    <input class="input" id="creativeIdea" placeholder="What are you creating today?">
+    <button class="primary" onclick="activateCreative()">ACTIVATE</button>
+    <div id="creativeResult"></div>
+  </div>
+  <div class="panel">
+    <h3>Creative checklist</h3>
+    <label class="check"><input type="checkbox"> Name the idea.</label>
+    <label class="check"><input type="checkbox"> Make one tangible piece.</label>
+    <label class="check"><input type="checkbox"> Save/version the work.</label>
+    <label class="check"><input type="checkbox"> Decide the next public or private step.</label>
+  </div>
+</section>
+
+<section id="build" class="section">
+  <div class="section-title"><div class="eyebrow">BUILD</div><h2>Strategy becomes action.</h2><p>One revenue-producing move is more useful than ten scattered tasks.</p></div>
+  <div class="panel">
+    <h3>Today's ONE non-negotiable</h3>
+    <textarea id="buildGoal" placeholder="What absolutely needs to move forward today?"></textarea>
+    <button class="primary" onclick="anchorGoal()">SET ANCHOR</button>
+    <div id="buildResult"></div>
+  </div>
+  <div class="panel">
+    <h3>Decision Triangle</h3>
+    <label class="check"><input type="checkbox" id="mission"> <span><b>MISSION</b><br>Does this directly move a meaningful goal forward?</span></label>
+    <label class="check"><input type="checkbox" id="afford"> <span><b>AFFORD</b><br>Can I comfortably afford the cash outlay right now?</span></label>
+    <label class="check"><input type="checkbox" id="reverse"> <span><b>REVERSIBLE</b><br>Can I undo or correct this decision?</span></label>
+    <button class="primary" onclick="evaluateDecision()">CHECK DECISION</button>
+    <div id="decisionResult"></div>
+  </div>
+</section>
+
+<section id="receive" class="section">
+  <div class="section-title"><div class="eyebrow">RECEIVE</div><h2>Make room for what arrives.</h2><p>Track opportunities without turning every coincidence into a prediction.</p></div>
+  <div class="panel">
+    <h3>Receiving log</h3>
+    <input class="input" id="receiveItem" placeholder="Opportunity, payment, compliment, idea...">
+    <button class="primary" onclick="logReceive()">LOG IT</button>
+    <div id="receiveResult"></div>
+  </div>
+  <div class="panel">
+    <h3>Money intention</h3>
+    <div class="quote">“I can receive without abandoning discernment.”</div>
+    <button class="secondary" onclick="showToast('Intention saved for today.')">SAVE INTENTION</button>
+  </div>
+</section>
+
+<section id="decide" class="section">
+  <div class="section-title"><div class="eyebrow">DECIDE</div><h2>Sign or Signal?</h2><p>Record what happened before deciding what it means. Your spiritual interpretation belongs to you.</p></div>
+  <div class="panel">
+    <label class="label">What happened?</label><textarea id="happened" placeholder="Describe only what you observed."></textarea>
+    <label class="label" style="display:block;margin-top:10px">What did I feel?</label><textarea id="felt" placeholder="Name the emotional response."></textarea>
+    <label class="label" style="display:block;margin-top:10px">What do I think it means?</label><textarea id="meaning" placeholder="Your personal or spiritual interpretation."></textarea>
+    <label class="label" style="display:block;margin-top:10px">What else could explain it?</label><textarea id="alternative" placeholder="A grounded alternative explanation."></textarea>
+    <label class="label" style="display:block;margin-top:10px">What happened next?</label><textarea id="next" placeholder="Record the outcome later."></textarea>
+    <button class="primary" onclick="saveSignal()">SAVE ENTRY</button>
+    <div id="signalResult"></div>
+  </div>
+  <div class="panel">
+    <h3>Reflection</h3>
+    <div class="quote">“I can honor intuition and still gather evidence.”</div>
+  </div>
+</section>
+
+<section id="close" class="section">
+  <div class="section-title"><div class="eyebrow">CLOSE</div><h2>The day is complete.</h2><p>Completion does not require finishing everything.</p></div>
+  <div class="panel">
+    <h3>Closure Ceremony</h3>
+    <label class="check"><input type="checkbox"> What I finished is enough for today.</label>
+    <label class="check"><input type="checkbox"> I release what remains unfinished.</label>
+    <label class="check"><input type="checkbox"> I honor one boundary I kept.</label>
+    <label class="check"><input type="checkbox"> I name one thing I'm grateful for.</label>
+    <label class="check"><input type="checkbox"> I choose tomorrow's first move.</label>
+    <button class="primary" onclick="completeDay()">CLOSE THE DAY</button>
+  </div>
+  <div class="panel">
+    <h3>Closing words</h3>
+    <div class="quote">“The day is complete. I release what is unfinished. I return to myself fully.”</div>
+  </div>
+</section>
+
+<section id="ai" class="section">
+  <div class="section-title"><div class="eyebrow">COMMAND CENTER</div><h2>Ritual intelligence.</h2><p>This interface can route you toward reflection, focus and practical action. No API key is embedded in this app.</p></div>
+  <div class="quick">
+    <button onclick="aiPrompt('I feel scattered.')">I'm scattered</button>
+    <button onclick="aiPrompt('I need to focus.')">I need focus</button>
+    <button onclick="aiPrompt('I need a reset.')">I need a reset</button>
+    <button onclick="aiPrompt('I have a creative idea.')">I have an idea</button>
+  </div>
+  <div class="panel">
+    <textarea id="aiInput" placeholder="Tell Ritual OS what you need right now..."></textarea>
+    <button class="primary" onclick="runLocalAI()">ROUTE ME</button>
+    <div class="result" id="aiResult" style="display:none"></div>
+  </div>
+</section>
+
+<div class="footer">Ritual OS 2.0 is a personal reflection and spiritual-practice tool. Ritual meanings are cultural/personal, not guarantees of supernatural or medical outcomes.</div>
+</main>
+
+<div class="breath" id="breath">
+  <div class="breath-inner">
+    <div class="breath-circle" id="breathCircle">Inhale</div>
+    <div id="breathCount" style="font:700 10px Space Mono;letter-spacing:2px">CYCLE 1 OF 3</div>
+    <div style="max-width:280px;font:italic 18px 'Cormorant Garamond';line-height:1.5">I return to center.<br>I choose my actions deliberately.</div>
+    <button class="secondary" onclick="stopBreath()">CLOSE</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<nav class="nav">
+  <button class="active" onclick="openSection('home',this)"><span class="ico">☀</span>HOME</button>
+  <button onclick="openSection('protect',this)"><span class="ico">✦</span>PROTECT</button>
+  <button onclick="openSection('create',this)"><span class="ico">✎</span>CREATE</button>
+  <button onclick="openSection('build',this)"><span class="ico">⌂</span>BUILD</button>
+  <button onclick="openSection('decide',this)"><span class="ico">◇</span>DECIDE</button>
+  <button onclick="openSection('ai',this)"><span class="ico">◎</span>AI</button>
+</nav>
+
+<script>
+const KEY='ritual_os_2';
+const defaults={
+ names:[
+  {name:'Saneca Mack',type:'Root',status:'Protected'},
+  {name:'Saneca TV',type:'Creative / Media',status:'Public'},
+  {name:'Saneca TV LLC',type:'Business',status:'Protected'},
+  {name:'Brass Earthling',type:'Music',status:'Protected'},
+  {name:'The Switchblades',type:'Collective',status:'Protected'}
+ ],
+ veil:{'My time':'Limited','My information':'Protected','Creative work':'Limited','My names':'Protected'},
+ intention:'I move with clarity and authority.',
+ days:{}
+};
+let state=load();
+function load(){try{return Object.assign({},defaults,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch{return {...defaults}}}
+function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(window.tt);window.tt=setTimeout(()=>t.classList.remove('show'),2600)}
+function today(){return new Date().toISOString().slice(0,10)}
+function openSection(id,btn){
+ document.querySelectorAll('.section').forEach(x=>x.classList.remove('active'));
+ document.getElementById(id).classList.add('active');
+ document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+ if(btn)btn.classList.add('active');
+ else {const b=[...document.querySelectorAll('.nav button')].find(x=>x.textContent.toLowerCase().includes(id==='home'?'home':id));if(b)b.classList.add('active')}
+ scrollTo(0,0);render();
+}
+document.getElementById('date').textContent=new Date().toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+function setIntention(){const x=prompt('Set today’s intention:',state.intention);if(x){state.intention=x;save();render();showToast('Intention updated.')}}
+function render(){
+ document.getElementById('intention').textContent=state.intention;
+ const completed=state.days[today()]?.complete;
+ const count=Object.keys(state.days).filter(k=>state.days[k].complete).length;
+ document.getElementById('streak').textContent=`${count} DAY${count===1?'':'S'}`;
+ renderNames();renderVeil();
+}
+function renderNames(){
+ const el=document.getElementById('names');if(!el)return;
+ el.innerHTML=state.names.map((n,i)=>`<div class="name-card"><div><strong>${esc(n.name)}</strong><small>${esc(n.type)}</small><span class="tag">${esc(n.status)}</span></div><button class="secondary" onclick="removeName(${i})">REMOVE</button></div>`).join('')||'<div class="empty">No names added yet.</div>';
+}
+function renderVeil(){
+ const el=document.getElementById('veil');if(!el)return;
+ el.innerHTML=Object.keys(state.veil).map(k=>`<div style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;margin-top:7px;font-size:10px"><b>${esc(k)}</b><select onchange="setVeil('${esc(k)}',this.value)" style="width:120px;padding:7px;border-radius:10px;border:1px solid var(--line)">${['Open','Limited','Private','Protected','Closed'].map(v=>`<option ${state.veil[k]===v?'selected':''}>${v}</option>`).join('')}</select></div>`).join('');
+}
+function setVeil(k,v){state.veil[k]=v;save();showToast(`${k}: ${v}`)}
+function addName(){const name=prompt('Name or identity to add:');if(!name)return;const type=prompt('Type: Root, Creative, Business, Public, Collective, Project, Retired','Project')||'Project';state.names.push({name,type,status:'Protected'});save();render();showToast('Name added to the Vault.')}
+function removeName(i){if(confirm(`Remove ${state.names[i].name} from the active Name Vault?`)){state.names.splice(i,1);save();render()}}
+function wardAll(){
+ state.names.forEach(n=>n.status='Protected');save();render();
+ document.getElementById('wardResult').innerHTML='<div class="result">WARD ACTIVE\n\nI protect the integrity of every name I carry and create under.\n\nI choose what receives access.\nI release fear-based interpretation.\nI keep my boundaries clear.\nI move forward in my own authority.</div>';
+ showToast('Name Ward activated.');
+}
+let breathTimer=null,cycle=0,phase=0;
+function startBreath(){
+ if(breathTimer)return;document.getElementById('breath').classList.add('active');cycle=1;phase=0;runBreath();
+}
+function runBreath(){
+ const circle=document.getElementById('breathCircle'),count=document.getElementById('breathCount');
+ const phases=[['Inhale',4000,'in'],['Hold',4000,''],['Exhale',6000,'out']];
+ const [label,dur,cls]=phases[phase];circle.textContent=label;circle.className='breath-circle '+cls;count.textContent=`CYCLE ${cycle} OF 3`;
+ breathTimer=setTimeout(()=>{phase++;if(phase>=3){phase=0;cycle++;if(cycle>3){stopBreath();showToast('Back to center.');return}}runBreath()},dur);
+}
+function stopBreath(){clearTimeout(breathTimer);breathTimer=null;document.getElementById('breath').classList.remove('active')}
+function anchorGoal(){const v=document.getElementById('buildGoal').value.trim();if(!v)return showToast('Enter one anchor task.');document.getElementById('buildResult').innerHTML=`<div class="result"><b>YOUR ANCHOR</b>\n${esc(v)}\n\nStart with 25 focused minutes. Everything else can wait until this moves.</div>`;showToast('Anchor set.')}
+function evaluateDecision(){const vals=['mission','afford','reverse'].map(id=>document.getElementById(id).checked);const all=vals.every(Boolean);document.getElementById('decisionResult').innerHTML=`<div class="result"><b>${all?'PROCEED WITH INTENTION':'PAUSE AND REVISIT'}</b>\n\n${all?'All three practical checks are satisfied.':'At least one practical check is not satisfied. Pause before committing.'}</div>`}
+function activateCreative(){const v=document.getElementById('creativeIdea').value.trim();if(!v)return showToast('Name the thing you are creating.');document.getElementById('creativeResult').innerHTML=`<div class="result"><b>MAKE IT TANGIBLE</b>\n\n${esc(v)}\n\n1. Make one piece.\n2. Save/version it.\n3. Decide the next action.\n4. Stop when the session is complete.</div>`}
+function logReceive(){const v=document.getElementById('receiveItem').value.trim();if(!v)return showToast('Enter something to log.');document.getElementById('receiveResult').innerHTML=`<div class="result">Logged: ${esc(v)}\n\nReceive it. Verify it. Decide what to do with it.</div>`;document.getElementById('receiveItem').value='';showToast('Receiving log updated.')}
+function saveSignal(){const data={date:today(),h:document.getElementById('happened').value,f:document.getElementById('felt').value,m:document.getElementById('meaning').value,a:document.getElementById('alternative').value,n:document.getElementById('next').value};state.signal=data;save();document.getElementById('signalResult').innerHTML='<div class="result">Entry saved. Come back later and record what actually happened next.</div>';showToast('Reflection saved.')}
+function completeDay(){state.days[today()]={complete:true};save();render();showToast('Day closed. You kept the promise to yourself.')}
+function saveNote(){state.intention='What carries my name is handled with integrity. I decide what receives my access.';save();render();showToast('Protection intention saved.')}
+function aiPrompt(v){document.getElementById('aiInput').value=v;openSection('ai')}
+function runLocalAI(){
+ const v=document.getElementById('aiInput').value.trim();if(!v)return showToast('Tell me what you need.');
+ let out='ROUTING YOUR NEED\\n\\n';
+ const s=v.toLowerCase();
+ if(/scattered|overwhelm|anxious|angry|stress|tired/.test(s))out+='CLEAR → Take three slow breaths, reduce the next step to one action, and remove one source of noise.\\n\\n';
+ else if(/focus|work|task|deadline/.test(s))out+='BUILD → Choose one non-negotiable task and give it 25 uninterrupted minutes.\\n\\n';
+ else if(/idea|music|song|art|write|create/.test(s))out+='CREATE → Capture the idea, make one tangible piece, and save it before chasing the next idea.\\n\\n';
+ else if(/money|client|price|business|sell|revenue/.test(s))out+='RECEIVE + BUILD → Identify the action closest to actual revenue, then execute it before adding another project.\\n\\n';
+ else if(/protect|boundary|name|person|access/.test(s))out+='PROTECT → Define the boundary, decide what access is allowed, and document the decision.\\n\\n';
+ else out+='DECIDE → Separate what you observed from what you think it means. Then choose the smallest useful action.\\n\\n';
+ out+='Your next move: '+v;
+ const el=document.getElementById('aiResult');el.textContent=out;el.style.display='block';
+}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+render();
+</script>
+</body>
+</html>
